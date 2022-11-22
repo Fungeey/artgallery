@@ -88,8 +88,7 @@ let initFPSCam = (camera, player, renderer) => {
     if(Math.abs(player.position.x - target.position.x) > threshold) target.position.x = player.position.x;
     if(Math.abs(player.position.z - target.position.z) > threshold) target.position.z = player.position.z;
 
-    // player.velocity = new CANNON.Vec3(50, player.velocity.y, 0);
-    camera.position.set(player.position.x, player.position.y + 1.5, player.position.z);
+    camera.position.lerp(new THREE.Vector3(player.position.x, player.position.y + 1.5, player.position.z), 0.1);
 
     prevTime = time;
   }

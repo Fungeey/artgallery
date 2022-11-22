@@ -1,18 +1,16 @@
+import { MeshBasicMaterial } from "three";
 import * as util from "../util.js";
-import { artTextures } from "./textures.js";
+import { usedTextures, artTextures } from "./textures.js";
 
 const { sin, cos, PI, max, min } = Math;
 
+let floorMat;
 let initLevel = ({ THREE, camera, scene, render, world }) => {  
   let ambientLight = new THREE.AmbientLight(0x707070);
   scene.add(ambientLight);
 
-  // load textures
-  let arts = [];
-  function getArt(){
-    let random = Math.floor(Math.random()*arts.length);
-    return arts[random];
-  }
+  const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 0.2);
+  scene.add(light);
   
   let addMarker = async (vector3, size) => {
     return;
@@ -22,19 +20,17 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
     sphere.position.set(vector3.x, vector3.y, vector3.z);
     scene.add( sphere );
   };
-
-  function addCanvas(canvasPos){
-    let geo = new THREE.PlaneGeometry(2, 2);
-    let mat = new THREE.MeshBasicMaterial({ map:getArt(), side: THREE.DoubleSide });
-    let plane = new THREE.Mesh(geo, mat);
-    plane.position.set(canvasPos.x, canvasPos.y, canvasPos.z);
-    scene.add(plane);
-    return plane;
-  }
   
-  loadGallery();
-  addLighting();
-  addBounds();
+  async function loadAll(){
+    addBounds();
+    addLighting();
+    await loadGallery();
+    await loadFurniture();
+    await addCanvases();
+  }
+  loadAll();
+
+  let videoTex = addTVs();
 
   let fixedTimeStep = 1.0 / 60.0;
   let maxSubSteps = 3;
@@ -46,17 +42,153 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
       world.step(fixedTimeStep, dt, maxSubSteps)
     }
     lastTime = time;
+
+    videoTex.needsUpdate = true;
     render();
   })();
 
-  async function loadArt(){
-    for(let i = 0; i < artTextures.length; i++){
-      arts[i] = await util.loadTexture("./assets/textures/" + artTextures[i]);
+  async function addCanvases(){
+    let arts = [];
+    for(let i = 0; i < usedTextures.length; i++)
+      arts[i] = await util.loadTexture("./assets/textures/" + artTextures[usedTextures[i]]);
+    
+    function getArt(){
+      let random = Math.floor(Math.random()*arts.length);
+      return arts[random];
     }
+
+    let bannerPng = await util.loadTexture("./assets/banner.png");
+    let bannerGeo = new THREE.BoxGeometry(8, bannerPng.image.height / bannerPng.image.width * 8, 0.01);
+    let banner = new THREE.Mesh( bannerGeo, new THREE.MeshBasicMaterial( { map: bannerPng, transparent :true } ) );
+    banner.position.set(10.9, 1, 13);
+    banner.rotation.set(0, Math.PI/2 * 1, 0);
+    scene.add(banner);
+
+    function addCanvas(id, pos, rot, scale = 1){
+      let tex = arts[id];
+      let geo = new THREE.BoxGeometry(2 * scale, tex.image.height / tex.image.width * 2 * scale, 0.1);
+
+      let cubeMaterialArray = [
+        floorMat,
+        floorMat,
+        floorMat,
+        floorMat,
+        new THREE.MeshBasicMaterial( { map: tex } ),
+        new THREE.MeshBasicMaterial( { map: tex } )
+      ];
+      let canvas = new THREE.Mesh( geo, cubeMaterialArray );
+      canvas.position.set(pos[0], pos[1], pos[2]);
+      canvas.rotation.set(0, Math.PI/2 * rot, 0);
+      scene.add(canvas);
+
+      let cubeGeometry = new THREE.BoxGeometry(2 * scale+0.1, tex.image.height / tex.image.width * 2 * scale+0.1, 0.08);
+      let frame = new THREE.Mesh(cubeGeometry, floorMat);
+      frame.position.set(pos[0], pos[1], pos[2]);
+      frame.rotation.set(0, Math.PI/2 * rot, 0);
+      scene.add(frame);
+
+      return canvas;
+    }
+
+    let space = 4;
+    let smallSpace = 3;
+    // - tv area
+    // south wall
+    addCanvas(1, [15.95, 2, 5.5], 1);
+    addCanvas(0, [15.95, 2, 5.5 - space*1], 1);
+    addCanvas(2, [15.95, 2, 5.5 - space*2], 1);
+    addCanvas(3, [15.95, 2, 5.5 - space*3], 1);
+    addCanvas(4, [15.95, 2, 5.5 - space*4], 1);
+    addCanvas(5, [15.95, 2, 5.5 - space*5], 1);
+    // east
+    addCanvas(6, [12, 2, -15.9], 2);
+    addCanvas(7, [12-space, 2, -15.9], 2);
+    addCanvas(8, [12-space*2, 2, -15.9], 2);
+    // west
+    addCanvas(9, [13.5, 2, 7.95], 2);
+    addCanvas(10, [3.5, 2, 7.95], 2);
+    //north
+    addCanvas(11, [1.05, 2, 5.5], 1);
+    addCanvas(12, [1.05, 2, 2.5], 1);
+    addCanvas(13, [1.05, 2, -10.5], 1);
+    addCanvas(14, [1.05, 2, -13.5], 1);
+
+    //-under area
+    // east
+    addCanvas(15, [-9, 2, -15.9], 2);
+    addCanvas(16, [-9-space, 2, -15.9], 2);
+    addCanvas(17, [-9-space*2, 2, -15.9], 2);
+    //west
+    addCanvas(18, [-9, 2, 7.95], 2);
+    addCanvas(19, [-9-space, 2, 7.95], 2);
+    addCanvas(20, [-9-space*2, 2, 7.95], 2);
+    //north
+    addCanvas(32, [-19.8, 5.5, -4], 1, 2.5); // portrait
+    addCanvas(22, [-19.8, 2, 5.75], 1);
+    addCanvas(23, [-19.8, 2, 5.75-3], 1);
+    addCanvas(24, [-19.8, 2, -10.5], 1);
+    addCanvas(25, [-19.8, 2, -10.5-3], 1);
+    
+    //-upstairs
+    // east
+    addCanvas(26, [-12, 7, -19.9], 2);
+    addCanvas(27, [-12-3.5, 7, -19.9], 2);
+    addCanvas(28, [-12-3.5*2, 7, -19.9], 2);
+    addCanvas(29, [-12-3.5*3, 7, -19.9], 2);
+    addCanvas(30, [-12-3.5*4, 7, -19.9], 2);
+    addCanvas(31, [-12-3.5*5, 7, -19.9], 2);
+
+    addCanvas(34, [-31.9, 7, -17.5], 1);
+    addCanvas(35, [-31.9, 7, -17.5+3.5], 1);
+    addCanvas(36, [-31.9, 7, -17.5+3.5*2], 1);
+    // west
+    addCanvas(37, [-12, 7, 11.9], 2);
+    addCanvas(38, [-12-3.5, 7, 11.9], 2);
+    addCanvas(39, [-12-3.5*2, 7, 11.9], 2);
+    addCanvas(40, [-12-3.5*3, 7, 11.9], 2);
+    addCanvas(41, [-12-3.5*4, 7, 11.9], 2);
+    addCanvas(42, [-12-3.5*5, 7, 11.9], 2);
+
+    addCanvas(43, [-12-3.5*3-1.5, 7.7, 0.1], 2, 2);
+    addCanvas(44, [-12-3.5*3-1.5, 7.7, -8.1], 2, 1.5);
+
+    addCanvas(45, [-31.9, 7, 2.5], 1);
+    addCanvas(46, [-31.9, 7, 2.5+3.5], 1);
+    addCanvas(47, [-31.9, 7, 2.5+3.5*2], 1);
+  }
+
+  function addTVs(){
+    let videos = [];
+    function addTV(id, x, y, z, aspect, scale){
+      let video = document.getElementById(id);
+      video.play();
+      let videoTex = new THREE.VideoTexture(video);
+      let movieMat = new THREE.MeshBasicMaterial({
+        map: videoTex, 
+        side: THREE.FrontSide,
+        toneMapped: false
+      })
+
+      let movieGeometry = new THREE.BoxGeometry(scale*aspect, scale, 0.1);
+      let movieCube = new THREE.Mesh(movieGeometry, movieMat);
+      movieCube.position.set(x, y, z);
+      scene.add(movieCube);
+
+      let cubeGeometry = new THREE.BoxGeometry(scale*aspect+0.1, scale+0.1, 0.08);
+      let tvCube = new THREE.Mesh(cubeGeometry, new MeshBasicMaterial({color:0x000000}));
+      tvCube.position.set(x, y, z);
+      scene.add(tvCube);
+
+      videos.push(videoTex);
+    }
+
+    addTV("video1", 8.5, 2.3, -4.4, 0.8, 2.5);
+    addTV("video2", 8.5, 2.75, -3.79, 1, 3);
+
+    return videos;
   }
 
   async function loadGallery() {
-    await loadArt();
     let gallery = await util.loadGLB("./assets/models/gallery.glb");
     gallery.scene.position.y += 0.25;
 
@@ -68,6 +200,7 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
 
         if (e.material.map !== null) {
           if (e.material.name === "floor"){
+            floorMat = e.material;
             let brightness = 0.13;
             e.material.roughness = 0.6;
             e.material.emissive = {isColor:true, r:brightness, g:brightness, b:brightness};
@@ -83,22 +216,33 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
         }
       }
     });
-
-    {
-      var geo = new THREE.PlaneGeometry(5, 5);
-      var mat = new THREE.MeshBasicMaterial({ map:arts[99], side: THREE.DoubleSide });
-      var plane = new THREE.Mesh(geo, mat);
-      plane.position.set(-19.7, 4, -4);
-      plane.rotateY(PI / 2);
-      scene.add(plane);
-    }
-
     scene.add(gallery.scene);
   };
+  
+  async function loadFurniture(){
+    async function addObject(name, x, y, z, rot, scale){
+      let obj = await util.loadGLB("./assets/models/" + name);
+      obj.scene.scale.set(scale, scale, scale);
+      obj.scene.position.set(x, y, z);
+      obj.scene.rotation.set(0, Math.PI/2 * rot, 0);
+      scene.add(obj.scene);
+    }
+
+    addObject("door.glb", 1.25, 0, 15.5, -1, 1.75);
+    addObject("table.glb", -5, 5, 3, 1, 1.5);
+    addObject("player.glb", -5, 6.4, 3, 3, 15);
+
+    addObject("bench.glb", -18, 5.25, 6, 0, 2);
+    addObject("bench.glb", -22, 5.25, 6, 0, 2);
+    addObject("bench.glb", -18, 5.25, -14, 0, 2);
+    addObject("bench.glb", -22, 5.25, -14, 0, 2);
+    addObject("bench.glb", 8.5, 0.25, -8, 0, 2); // downstairs
+    addObject("bench.glb", 8.5, 0.25, 0, 0, 2);
+  }
 
   function addLighting(){
     function addBigLight(vector3, intensity){
-      const light = new THREE.PointLight(0xffffff, 0.5, 10);
+      const light = new THREE.PointLight(0xfaf9f6, 0.5, 10);
       light.position.set(vector3.x, vector3.y, vector3.z);
       scene.add(light);
       addMarker(vector3, 0.2);

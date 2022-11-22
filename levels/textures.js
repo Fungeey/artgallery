@@ -1,3 +1,59 @@
+let usedTextures = [2,
+    3,
+    8,
+    10,
+    14,
+    19,
+    20,
+    26,
+    30,
+    32,
+    33,
+    36,
+    37,
+    39,
+    40,
+    42,
+    43,
+    44,     //kda
+    45,
+    49,
+    52,
+    54,
+    59,     // recap
+    60,
+    64,
+    66,
+    70,
+    75,     //green guy
+    77,     //graphic deisgn
+    79,
+    85,     // kda
+    86,     // squid game
+    89,     // self portrai
+    95,     //green guy
+    93,     // study
+    98,
+    99,     // squid game
+    100,    //guy with hand
+    103,    // lyrics
+    106,
+    110,
+    111,
+    112,    //kda
+    113,
+    116,    // grey ig thing
+    120,
+    125,    // dark city
+    127,
+    129,    //cottagecore
+    133,    // famous gu
+    134,
+    136,
+    130,
+]
+
+
 let artTextures = `10apr2020.jfif
 10feb2022.jfif
 10june2021.jfif
@@ -135,4 +191,4 @@ let artTextures = `10apr2020.jfif
 9jan2020.jfif
 9mar2020.jfif
 sept20-2022.jfif`.split("\n");
-export {artTextures};
+export {usedTextures, artTextures};
