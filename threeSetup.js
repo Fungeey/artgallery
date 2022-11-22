@@ -15,7 +15,7 @@ scene = new THREE.Scene();
 
 let stats = new Stats();
 stats.showPanel(0); 
-document.body.appendChild( stats.dom );
+// document.body.appendChild( stats.dom );
 
 renderer = new THREE.WebGLRenderer({
   antialias: true,
@@ -39,7 +39,7 @@ let player = new CANNON.Body({
 });
 world.addBody(player);
 camera.position.set(4, 2, 15.5);
-camera.rotation.set(0, Math.PI/2, 0);
+camera.rotation.set(0, -Math.PI/2, 0);
 
 let debugRenderer = new cannonDebugRenderer(THREE, scene, world);
 
