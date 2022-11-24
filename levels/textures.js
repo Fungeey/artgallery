@@ -1,5 +1,5 @@
 let usedTextures = [2,
-    3,
+    3,  // kda
     8,
     10,
     14,

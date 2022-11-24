@@ -69,12 +69,12 @@ let initFPSCam = (camera, player, renderer) => {
     if (moveLeft || moveRight) velocity.x = direction.x;
 
     if (run) spd = 15;
-    else spd = 5;
+    else spd = 4;
 
     controls.moveRight(velocity.x * spd * delta);
     controls.moveForward(velocity.z * spd * delta);
 
-    let lerpSpeed = 40;
+    let lerpSpeed = 20;
     player.velocity = new CANNON.Vec3(
       (target.position.x - player.position.x)*lerpSpeed,
       player.velocity.y,
@@ -88,7 +88,7 @@ let initFPSCam = (camera, player, renderer) => {
     if(Math.abs(player.position.x - target.position.x) > threshold) target.position.x = player.position.x;
     if(Math.abs(player.position.z - target.position.z) > threshold) target.position.z = player.position.z;
 
-    camera.position.lerp(new THREE.Vector3(player.position.x, player.position.y + 1.5, player.position.z), 0.1);
+    camera.position.lerp(new THREE.Vector3(player.position.x, player.position.y + 1.75, player.position.z), 0.1);
 
     prevTime = time;
   }

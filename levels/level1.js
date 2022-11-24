@@ -1,25 +1,16 @@
-import { MeshBasicMaterial } from "three";
+import { Camera, MeshBasicMaterial } from "three";
 import * as util from "../util.js";
 import { usedTextures, artTextures } from "./textures.js";
 
 const { sin, cos, PI, max, min } = Math;
 
 let floorMat;
-let initLevel = ({ THREE, camera, scene, render, world }) => {  
+let initLevel = async ({ THREE, camera, scene, render, world }) => {  
   let ambientLight = new THREE.AmbientLight(0x707070);
   scene.add(ambientLight);
 
   const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 0.2);
   scene.add(light);
-  
-  let addMarker = async (vector3, size) => {
-    return;
-    const geometry = new THREE.SphereGeometry( size, 32, 16 );
-    const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-    const sphere = new THREE.Mesh( geometry, material );
-    sphere.position.set(vector3.x, vector3.y, vector3.z);
-    scene.add( sphere );
-  };
   
   async function loadAll(){
     addBounds();
@@ -27,8 +18,9 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
     await loadGallery();
     await loadFurniture();
     await addCanvases();
+    console.log("loaded");
   }
-  loadAll();
+  await loadAll();
 
   let videoTex = addTVs();
 
@@ -94,67 +86,71 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
     let smallSpace = 3;
     // - tv area
     // south wall
-    addCanvas(1, [15.95, 2, 5.5], 1);
-    addCanvas(0, [15.95, 2, 5.5 - space*1], 1);
-    addCanvas(2, [15.95, 2, 5.5 - space*2], 1);
-    addCanvas(3, [15.95, 2, 5.5 - space*3], 1);
-    addCanvas(4, [15.95, 2, 5.5 - space*4], 1);
-    addCanvas(5, [15.95, 2, 5.5 - space*5], 1);
+    addCanvas(1, [15.95, 2.25, 6.5], 1, 1.25);
+    addCanvas(0, [15.95, 2.25, 6.5 - 3*1], 1, 1.25);
+    addCanvas(2, [15.95, 2.25, 6.5 - 3*2], 1, 1.25);
+    addCanvas(26, [15.95, 2.25, 6.5 - 3*3], 1, 1.25);  
+    addCanvas(4, [15.95, 2.25, 6.5 - 3*4], 1, 1.25);
+    addCanvas(5, [15.95, 2.25, 6.5 - 3*5], 1, 1.25);
+    addCanvas(48, [15.95, 2.25, 6.5 - 3*6], 1, 1.25);
+    addCanvas(49, [15.95, 2.25, 6.5 - 3*7], 1, 1.25);
+    addCanvas(50, [15.95, 2.25, 6.5 - 3*8], 1, 1.25);
     // east
-    addCanvas(6, [12, 2, -15.9], 2);
-    addCanvas(7, [12-space, 2, -15.9], 2);
-    addCanvas(8, [12-space*2, 2, -15.9], 2);
+    addCanvas(31, [13, 3, -15.9], 2, 1.75);
+    addCanvas(36, [12-space, 3, -15.9], 2, 2);
+    addCanvas(20, [11.5-space*2, 3, -15.9], 2, 1.5);
     // west
     addCanvas(9, [13.5, 2, 7.95], 2);
-    addCanvas(10, [3.5, 2, 7.95], 2);
+    addCanvas(10, [3.5, 2.25, 7.95], 2, 1.5); // study
     //north
-    addCanvas(11, [1.05, 2, 5.5], 1);
-    addCanvas(12, [1.05, 2, 2.5], 1);
-    addCanvas(13, [1.05, 2, -10.5], 1);
-    addCanvas(14, [1.05, 2, -13.5], 1);
+    addCanvas(11, [1.05, 2.25, 5.5], 1, 1.25);
+    addCanvas(12, [1.05, 2.25, 2.5], 1, 1.25);
+    addCanvas(13, [1.05, 2.25, -10.5], 1, 1.25);
+    addCanvas(14, [1.05, 2.25, -13.5], 1, 1.25);
 
     //-under area
     // east
-    addCanvas(15, [-9, 2, -15.9], 2);
-    addCanvas(16, [-9-space, 2, -15.9], 2);
-    addCanvas(17, [-9-space*2, 2, -15.9], 2);
+    addCanvas(19, [-9, 2, -15.9], 2, 1.5);
+    addCanvas(16, [-9-space, 2, -15.9], 2, 1.5);
+    addCanvas(28, [-9-space*2, 2, -15.9], 2, 1.25); 
     //west
-    addCanvas(18, [-9, 2, 7.95], 2);
-    addCanvas(19, [-9-space, 2, 7.95], 2);
-    addCanvas(20, [-9-space*2, 2, 7.95], 2);
+    addCanvas(18, [-9, 2, 7.95], 2, 1.5);
+    addCanvas(15, [-9-space, 2, 7.95], 2, 1.25);
+    addCanvas(43, [-9-space*2, 2, 7.95], 2, 1.5);
     //north
     addCanvas(32, [-19.8, 5.5, -4], 1, 2.5); // portrait
-    addCanvas(22, [-19.8, 2, 5.75], 1);
-    addCanvas(23, [-19.8, 2, 5.75-3], 1);
-    addCanvas(24, [-19.8, 2, -10.5], 1);
-    addCanvas(25, [-19.8, 2, -10.5-3], 1);
+    addCanvas(22, [-19.8, 2.5, 4.4], 1, 2);
+    addCanvas(23, [-19.8, 2.5, -12.25], 1, 2);
+    // addCanvas(24, [-19.8, 2, -10.5], 1);
+    // addCanvas(25, [-19.8, 2, -10.5-3], 1);
     
     //-upstairs
     // east
-    addCanvas(26, [-12, 7, -19.9], 2);
-    addCanvas(27, [-12-3.5, 7, -19.9], 2);
-    addCanvas(28, [-12-3.5*2, 7, -19.9], 2);
-    addCanvas(29, [-12-3.5*3, 7, -19.9], 2);
-    addCanvas(30, [-12-3.5*4, 7, -19.9], 2);
-    addCanvas(31, [-12-3.5*5, 7, -19.9], 2);
+    //
+    addCanvas(3,  [-14, 7.5, -19.9], 2, 1.5);
+    addCanvas(42, [-14-4.5, 7.5, -19.9], 2, 1.5);
+    addCanvas(17, [-14-4.5*2, 7.5, -19.9], 2, 1.5);
+    addCanvas(30, [-14-4.5*3, 7.5, -19.9], 2, 1.5);
+    // addCanvas(29, [-12-3.5*4, 7.5, -19.9], 2, 1.75); 
+    // addCanvas(6, [-12-3.5*5, 7.5, -19.9], 2, 1.5);
 
-    addCanvas(34, [-31.9, 7, -17.5], 1);
-    addCanvas(35, [-31.9, 7, -17.5+3.5], 1);
-    addCanvas(36, [-31.9, 7, -17.5+3.5*2], 1);
+    addCanvas(34, [-31.9, 7.5, -17.5], 1, 1.5); // study
+    addCanvas(7, [-31.9, 7.5, -17.5+3.5], 1, 1.5); 
+    addCanvas(35, [-31.9, 7.5, -17.5+3.5*2], 1, 1.5);
     // west
-    addCanvas(37, [-12, 7, 11.9], 2);
-    addCanvas(38, [-12-3.5, 7, 11.9], 2);
-    addCanvas(39, [-12-3.5*2, 7, 11.9], 2);
-    addCanvas(40, [-12-3.5*3, 7, 11.9], 2);
-    addCanvas(41, [-12-3.5*4, 7, 11.9], 2);
-    addCanvas(42, [-12-3.5*5, 7, 11.9], 2);
+    addCanvas(37, [-12, 7.5, 11.9], 2, 1.5);
+    addCanvas(38, [-12-3.5, 7.5, 11.9], 2, 1.25);
+    addCanvas(39, [-12-3.5*2, 7.5, 11.9], 2, 1.25);
+    addCanvas(40, [-12-3.5*3, 7.5, 11.9], 2, 1.5);
+    addCanvas(41, [-12-3.5*4, 7.5, 11.9], 2, 1.25);
+    addCanvas(27, [-12-3.5*5, 7.5, 11.9], 2, 1.25);  
 
-    addCanvas(43, [-12-3.5*3-1.5, 7.7, 0.1], 2, 2);
+    addCanvas(8, [-12-3.5*3-1.5, 7.7, 0.1], 2, 2);
     addCanvas(44, [-12-3.5*3-1.5, 7.7, -8.1], 2, 1.5);
 
-    addCanvas(45, [-31.9, 7, 2.5], 1);
-    addCanvas(46, [-31.9, 7, 2.5+3.5], 1);
-    addCanvas(47, [-31.9, 7, 2.5+3.5*2], 1);
+    addCanvas(45, [-31.9, 7.5, 2.5], 1, 1.5);
+    addCanvas(46, [-31.9, 7.5, 2.5+3.5], 1, 1.25);
+    addCanvas(47, [-31.9, 7.5, 2.5+3.5*2], 1, 1.75);
   }
 
   function addTVs(){
@@ -208,10 +204,8 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
           }
 
           e.material = new THREE.MeshStandardMaterial({
-            color:0xffffff,
             transparent:true,
             opacity:0,
-            side: THREE.DoubleSide
           });
         }
       }
@@ -232,10 +226,14 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
     addObject("table.glb", -5, 5, 3, 1, 1.5);
     addObject("player.glb", -5, 6.4, 3, 3, 15);
 
-    addObject("bench.glb", -18, 5.25, 6, 0, 2);
-    addObject("bench.glb", -22, 5.25, 6, 0, 2);
-    addObject("bench.glb", -18, 5.25, -14, 0, 2);
-    addObject("bench.glb", -22, 5.25, -14, 0, 2);
+    addObject("bench.glb", -19, 5.25, 6, 0, 2);
+    addObject("bench.glb", -23, 5.25, 6, 0, 2);
+    addObject("bench.glb", -19, 5.25, -14, 0, 2);
+    addObject("bench.glb", -23, 5.25, -14, 0, 2);
+    
+    addObject("bench.glb", -7, 0.25, -4, 0, 2);
+    addObject("bench.glb", -13, 0.25, -4, 0, 2);
+
     addObject("bench.glb", 8.5, 0.25, -8, 0, 2); // downstairs
     addObject("bench.glb", 8.5, 0.25, 0, 0, 2);
   }
@@ -245,14 +243,12 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
       const light = new THREE.PointLight(0xfaf9f6, 0.5, 10);
       light.position.set(vector3.x, vector3.y, vector3.z);
       scene.add(light);
-      addMarker(vector3, 0.2);
     }
     
     function addSmallLight(vector3){
       const light = new THREE.PointLight(0x888888, 0.5, 10);
       light.position.set(vector3.x, vector3.y, vector3.z);
       scene.add(light);
-      addMarker(vector3, 0.1);
     }
 
     addBigLight({x:8.5, y:5, z:1});
@@ -328,11 +324,9 @@ let initLevel = ({ THREE, camera, scene, render, world }) => {
     makeBoundingBox([-17, 4.8, -11], [0, 0, 0], [15, 0.5, 3]); // longer
     makeBoundingBox([-22, 4.8, -18], [0, 0, 0], [15, 0.5, 4]); // shorter
 
-
     // left top floor 
     makeBoundingBox([-17, 4.8, 3], [0, 0, 0], [15, 0.5, 3]); // longer
     makeBoundingBox([-22, 4.8, 9.5], [0, 0, 0], [15, 0.5, 4]); // shorter
-
 
     // main center rails
     makeBoundingBox([-15, 9, -4], [0, 0, 0], [13, 4, 4]);
