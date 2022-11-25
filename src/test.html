@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Three.js exploration</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/style.css" />
+        </head>
+    <body>
+    </body>
+    <script type="module">
+        import { usedTextures, artTextures} from "./textures.js";
+        for(let i = 0; i < artTextures.length; i++){
+            let path = ".././assets/art/" + artTextures[i];
+
+            let holder = document.createElement("div");
+            holder.style.fontSize = "30px";
+            document.body.appendChild(holder);
+
+            let img = document.createElement("img");
+            img.setAttribute("src", path);
+            img.setAttribute("height", "300");
+            img.setAttribute("width", "300");
+            holder.appendChild(img);
+
+            let num = document.createTextNode(i);
+            holder.appendChild(num);
+        }
+    </script>
+</html>

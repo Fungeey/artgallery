@@ -36,6 +36,10 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
   // so this function rotates 360 degrees to allow every object to enter the viewport
   // and remove the lag spike, then allow the user to enter
   // we tell the user that we are "hanging paintings"
+
+  // doesn't work unless window is active
+  // solution: once everything is loaded, wait for window to be active.
+  // then do rotate and finish
   function rotate(){
     if(camera.rotation.y < targetRot){
       camera.rotation.y += 0.4;
@@ -162,12 +166,12 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     //-upstairs
     // east
     //
+    addCanvas(44,  [-10, 7.5, -18], 1, 1.5);
+    
     addCanvas(3,  [-14, 7.5, -19.9], 2, 1.5);
     addCanvas(42, [-14-4.5, 7.5, -19.9], 2, 1.5);
     addCanvas(17, [-14-4.5*2, 7.5, -19.9], 2, 1.5);
     addCanvas(30, [-14-4.5*3, 7.5, -19.9], 2, 1.5);
-    // addCanvas(29, [-12-3.5*4, 7.5, -19.9], 2, 1.75); 
-    // addCanvas(6, [-12-3.5*5, 7.5, -19.9], 2, 1.5);
 
     addCanvas(34, [-31.9, 7.5, -17.5], 1, 1.75); // study
     addCanvas(7, [-31.9, 7.5, -17.5+3.5], 1, 1.5); 
@@ -181,11 +185,16 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     addCanvas(27, [-12-3.5*5, 7.5, 11.9], 2, 1.25);  
 
     addCanvas(8, [-12-3.5*3-1.5, 7.7, 0.1], 2, 2);
-    addCanvas(44, [-12-3.5*3-1.5, 7.7, -8.1], 2, 1.5);
+    addCanvas(53, [-12-3.5*3-1.5, 7.7, -8.1], 2, 2);
 
     addCanvas(45, [-31.9, 7.5, 2.5], 1, 1.5);
     addCanvas(46, [-31.9, 7.5, 2.5+3.5], 1, 1.25);
     addCanvas(47, [-31.9, 7.5, 2.5+3.5*2], 1, 1.75);
+
+    // tunnel
+    addCanvas(29, [-31.9, 7.5, 2-3.5], 1, 1.75); 
+    addCanvas(6, [-31.9, 7.5, 2-4.5*2], 1, 1.5);
+    // addCanvas(51, [-31.9, 7.5, 2.5-3.5*3], 1, 1.5);
   }
 
   function addTVs(){
@@ -256,12 +265,19 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
   };
   
   async function loadFurniture(){
-    async function addObject(name, x, y, z, rot, scale){
+    async function addObject(name, x, y, z, rot, scale, isIvy){
       let obj = await util.loadGLB("./assets/models/" + name);
       obj.scene.scale.set(scale, scale, scale);
       obj.scene.position.set(x, y, z);
       obj.scene.rotation.set(0, Math.PI/2 * rot, 0);
       scene.add(obj.scene);
+      if(isIvy)
+        obj.scene.traverse((e) => {
+          if(e.material == null) return;
+          e.material.roughness = 0.6;
+          e.material.emissive = {isColor:true, r:0.13, g:0.13, b:0.13};
+        })
+      return obj.scene;
     }
 
     addObject("door.glb", 1.25, 0, 15.5, -1, 1.75);
@@ -278,6 +294,24 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
 
     addObject("bench.glb", 8.5, 0.25, -8, 0, 2); // downstairs
     addObject("bench.glb", 8.5, 0.25, 0, 0, 2);
+
+    // addIvy();
+
+    function addIvy(){
+      async function addIvyStrip(x, y, z, rot, len){
+        for(let i = 0; i < len; i++)
+          addObject("ivy.glb", x, y-2.2*i + Math.random()/2, z, rot, 0.2, true);
+      }
+  
+      let thres = 0.4;
+      for(let i = -19; i < 14; i++){
+        if(Math.random() > thres)
+        addIvyStrip(i, 10, 0, 2, Math.round((Math.random())*3));
+        
+        if(Math.random() > thres)
+        addIvyStrip(i, 10, -7.4, 2, Math.round((Math.random())*3));
+      }
+    }
   }
 
   function addLighting(){
