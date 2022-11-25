@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Three.js exploration</title>
+    <title>_greytofu's art gallery</title>
+    <link rel="icon" href="assets/favicon.ico">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="./style.css" />
@@ -21,29 +22,37 @@
         "
       ></div>
 
-      <div style = "display: flex; flex-direction: row;">
-        <div>
+      <div style = "display: flex; flex-direction: column; align-items: center;">
+        <br><br><br><br>
+
+        [wasd] -> move  <br>
+        mouse -> look <br>
+        [escape] -> pause <br>
+
+        <div style = "display: flex; align-items: center;">
+          <button id="resumeButton" style = "margin:20px;">Resume</button>
+        </div>
+
+        <br><br><br><br><br>
+
+        <div style = "display:flex; flex-direction: row;">
           <div class = "link" 
           onclick="window.open('https:\/\/github.com/Fungeey/artgallery','mywindow');">
             <img src = "assets/git.png" style = "width:50px; height:50px;"> <p style = "width:100px;">fungeey</p>
           </div>
+          <!-- <p style = "margin:0.25rem"> -->
           <div class = "link" 
           onclick="window.open('https:\/\/www.instagram.com/_greytofu/','mywindow');">
             <img src = "assets/insta.png" style = "width:50px; height:50px;"> <p style = "width:100px;">_greytofu</p>
           </div>
         </div>
-        <div style = "display: flex; align-items: center;">
-          <button id="resumeButton" style = "margin:20px;">Resume</button>
-        </div>
       </div>
 
       <div id="loading">
-        loading...
+        <p>loading...</p>
+        <p style = "font-size: 20px;"><br></p>
+        <p id = "loadstatus" style = "font-size: 20px;">loading models</p>
       </div>
-      
-      move using wasd <br>
-      look using mouse <br>
-      pause using escape
     </div>
     <div id = "text" style = "
       position:absolute;
@@ -84,6 +93,32 @@
       style="display:none"
     ></video>
 
+    <video
+      id = "video3"
+      playsinline
+      webkit-playsinline
+      muted
+      loop
+      autoplay
+      width="720"
+      height="900"
+      src="./assets/video/16feb2021.mp4"
+      style="display:none"
+    ></video>
+
+    <video
+      id = "video4"
+      playsinline
+      webkit-playsinline
+      muted
+      loop
+      autoplay
+      width="720"
+      height="900"
+      src="./assets/video/22apr2021.mp4"
+      style="display:none"
+    ></video>
+
     <script type="importmap">
       {
         "imports": {
@@ -91,9 +126,9 @@
         }
       }
     </script>
-    <script src="cannon.js"></script>
-    <script src="cannonDebugRenderer.js"></script>
-    <script type="module" src="threeSetup.js"></script>
+    <script src="/src/cannon.js"></script>
+    <script src="/src/cannonDebugRenderer.js"></script>
+    <script type="module" src="/src/threeSetup.js"></script>
     
   </body>
 </html>

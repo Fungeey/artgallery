@@ -1,5 +1,5 @@
 import { Camera, MeshBasicMaterial } from "three";
-import * as util from "../util.js";
+import * as util from "./util.js";
 import { usedTextures, artTextures } from "./textures.js";
 
 const { sin, cos, PI, max, min } = Math;
@@ -12,26 +12,49 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
   const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 0.2);
   scene.add(light);
   
-  let startRot = camera.rotation.y;
+  let targetRot = camera.rotation.y + Math.PI * 2;
   let loadingScreen = document.getElementById("loading");
+  let loadingText = document.getElementById("loadstatus");
+  let loaded = false;
 
   async function loadAll(){
+    animateDots();
+
     addBounds();
     addLighting();
+
+    loadingText.innerText = "loading gallery";
     await loadGallery();
     await loadFurniture();
+    loadingText.innerText = "loading furniture";
     await addCanvases();
     rotate();
   }
   await loadAll();
 
+  // there is a large lag spike when loaded objects first enter the viewport
+  // so this function rotates 360 degrees to allow every object to enter the viewport
+  // and remove the lag spike, then allow the user to enter
+  // we tell the user that we are "hanging paintings"
   function rotate(){
-    if(camera.rotation.y < startRot + Math.PI * 2){
+    if(camera.rotation.y < targetRot){
       camera.rotation.y += 0.4;
-      setTimeout(rotate, 100); 
+      loadingText.innerText = "hanging paintings (" + Math.round(50 - Math.abs(targetRot - camera.rotation.y)/Math.PI/2*50) + "/ 50)";
+      setTimeout(rotate, 50);
     }else{
       loadingScreen.style.display = "none";
+      loaded = true;
     }
+  }
+
+  function animateDots(){
+    if(loadingScreen.children[0].innerText.length >= 10)
+      loadingScreen.children[0].innerText = "loading.";
+    else
+      loadingScreen.children[0].innerText += ".";
+    
+      if(!loaded)
+      setTimeout(animateDots, 200);
   }
 
   let videoTex = addTVs();
@@ -54,7 +77,7 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
   async function addCanvases(){
     let arts = [];
     for(let i = 0; i < usedTextures.length; i++)
-      arts[i] = await util.loadTexture("./assets/textures/" + artTextures[usedTextures[i]]);
+      arts[i] = await util.loadTexture("./assets/art/" + artTextures[usedTextures[i]]);
     
     function getArt(){
       let random = Math.floor(Math.random()*arts.length);
@@ -167,19 +190,23 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
 
   function addTVs(){
     let videos = [];
-    function addTV(id, x, y, z, aspect, scale){
+    function addTV(id, x, y, z, aspect, scale, rot = 0){
       let video = document.getElementById(id);
       video.play();
       let videoTex = new THREE.VideoTexture(video);
-      let movieMat = new THREE.MeshBasicMaterial({
-        map: videoTex, 
-        side: THREE.FrontSide,
-        toneMapped: false
-      })
+      let cubeMaterialArray = [
+        new THREE.MeshBasicMaterial({color:0x000000}),
+        new THREE.MeshBasicMaterial({color:0x000000}),
+        new THREE.MeshBasicMaterial({color:0x000000}),
+        new THREE.MeshBasicMaterial({color:0x000000}),
+        new THREE.MeshBasicMaterial( { map: videoTex, } ),
+        new THREE.MeshBasicMaterial({color:0x000000}),
+      ];
 
       let movieGeometry = new THREE.BoxGeometry(scale*aspect, scale, 0.1);
-      let movieCube = new THREE.Mesh(movieGeometry, movieMat);
+      let movieCube = new THREE.Mesh(movieGeometry, cubeMaterialArray);
       movieCube.position.set(x, y, z);
+      movieCube.rotation.set(0, Math.PI * rot, 0);
       scene.add(movieCube);
 
       let cubeGeometry = new THREE.BoxGeometry(scale*aspect+0.1, scale+0.1, 0.08);
@@ -190,8 +217,11 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
       videos.push(videoTex);
     }
 
-    addTV("video1", 8.5, 2.3, -4.4, 0.8, 2.5);
+    addTV("video1", 8.5, 2.3, -4.4, 0.8, 2.5, 1);
     addTV("video2", 8.5, 2.75, -3.79, 1, 3);
+
+    addTV("video3", -4.25, 2.75, 3.25, 1, 3, 1);
+    addTV("video4", -4.25, 2.75, -11.04, 1, 3);
 
     return videos;
   }

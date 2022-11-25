@@ -3,6 +3,8 @@ import { initFPSCam } from "./fpsCamera.js";
 import {cannonDebugRenderer} from "./cannonDebugRenderer.js";
 import {Stats} from "./stats.js";
 
+let debug = false;
+
 let camera, scene, renderer;
 camera = new THREE.PerspectiveCamera(
   50,
@@ -15,10 +17,10 @@ scene = new THREE.Scene();
 
 let stats = new Stats();
 stats.showPanel(0); 
-// document.body.appendChild( stats.dom );
+if(debug) document.body.appendChild( stats.dom );
 
 renderer = new THREE.WebGLRenderer({
-  antialias: false,
+  antialias: true,
   alpha: true,
 });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -74,7 +76,6 @@ window.addEventListener("resize", onWindowResize, false);
 function render() {
   stats.begin();
   fpsCam.update();
-  // debugRenderer.update();
   renderer.render(scene, camera);
   stats.end();
 }
@@ -82,5 +83,5 @@ function render() {
 let exports = { THREE, camera, scene, render, world};
 
 // init scene
-import { level } from "./levels/level1.js";
+import { level } from "./level1.js";
 level.initLevel(exports);
