@@ -10,8 +10,8 @@
     </body>
     <script type="module">
         import { usedTextures, artTextures} from "./levels/textures.js";
-        for(let i = 0; i < usedTextures.length; i++){
-            let path = "./assets/textures/" + artTextures[usedTextures[i]];
+        for(let i = 0; i < artTextures.length; i++){
+            let path = "./assets/textures/" + artTextures[i];
 
             let holder = document.createElement("div");
             holder.style.fontSize = "30px";

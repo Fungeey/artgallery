@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
+    
     <div id="pauseScreen">
       <button id="resumeButton">Resume</button>
       <div
@@ -14,13 +15,26 @@
           position: absolute;
           width: 100%;
           height: 100%;
-          background-color: #ebebeb;
+          background-color: #FFFFFF;
           opacity: 0.5;
           z-index: -5;
           pointer-events: none;
         "
       ></div>
     </div>
+    <div id = "text" style = "
+      position:absolute;
+      display:none;
+      left:0;
+      right:0;
+      bottom:2rem;
+      z-index:4;
+      text-align: center;
+      font-size: 40px;
+      pointer-events:none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color:white;
+    ">play the music [space]</div>
     <video
       id = "video1"
       playsinline

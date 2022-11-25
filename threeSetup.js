@@ -3,7 +3,7 @@ import { initFPSCam } from "./fpsCamera.js";
 import {cannonDebugRenderer} from "./cannonDebugRenderer.js";
 import {Stats} from "./stats.js";
 
-let camera, scene, renderer, controls;
+let camera, scene, renderer;
 camera = new THREE.PerspectiveCamera(
   50,
   window.innerWidth / window.innerHeight,
@@ -18,11 +18,9 @@ stats.showPanel(0);
 // document.body.appendChild( stats.dom );
 
 renderer = new THREE.WebGLRenderer({
-  antialias: true,
+  antialias: false,
   alpha: true,
 });
-// renderer.setClearColor(0xffffff, 1);
-renderer.antialias = false;
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
@@ -43,8 +41,6 @@ camera.rotation.set(0, -Math.PI/2, 0);
 
 let debugRenderer = new cannonDebugRenderer(THREE, scene, world);
 
-let fpsCam = initFPSCam(camera, player, renderer);
-
 function onWindowResize(event) {
   let width = window.innerWidth;
   let height = window.innerHeight;
@@ -54,21 +50,22 @@ function onWindowResize(event) {
   renderer.setSize(width, height);
 }
 
-// // create an AudioListener and add it to the camera
-// const listener = new THREE.AudioListener();
-// camera.add( listener );
+// create an AudioListener and add it to the camera
+const listener = new THREE.AudioListener();
+camera.add( listener );
 
-// // create a global audio source
-// const sound = new THREE.Audio( listener );
+// create a global audio source
+const sound = new THREE.Audio( listener );
 
-// // load a sound and set it as the Audio object's buffer
-// const audioLoader = new THREE.AudioLoader();
-// audioLoader.load( "./assets/music.wav", function( buffer ) {
-// 	sound.setBuffer( buffer );
-// 	sound.setLoop( true );
-// 	sound.setVolume( 0.5 );
-// 	sound.play();
-// });
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load( "./assets/music.wav", function( buffer ) {
+	sound.setBuffer( buffer );
+	sound.setLoop( true );
+	sound.setVolume( 0.5 );
+});
+
+let fpsCam = initFPSCam(camera, player, renderer, sound);
 
 onWindowResize();
 window.addEventListener("resize", onWindowResize, false);

@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { Object3D, Vector3 } from "three";
 import { PointerLockControls } from "./pointerLockControls.js";
 
-let initFPSCam = (camera, player, renderer) => {
+let initFPSCam = (camera, player, renderer, sound) => {
   let prevTime = performance.now();
+
+  let playText = document.getElementById("text");
 
   let pauseScreen = document.getElementById("pauseScreen");
   let resumeButton = document.getElementById("resumeButton");
@@ -38,9 +40,13 @@ let initFPSCam = (camera, player, renderer) => {
   let moveBackward = false;
   let moveLeft = false;
   let moveRight = false;
-  let moveUp = false;
-  let moveDown = false;
   let run = false;
+
+  let interact = false;
+  let canInteract = true;
+
+  function getInteract() {return interact};
+
   const onDocumentKey = (e) => {
     keyMap[e.key] = e.type === "keydown";
 
@@ -50,7 +56,32 @@ let initFPSCam = (camera, player, renderer) => {
       moveLeft = keyMap["a"] === undefined ? false : keyMap["a"];
       moveRight = keyMap["d"] === undefined ? false : keyMap["d"];
       run = keyMap["j"] === undefined ? false : keyMap["j"];
+
+      interact = keyMap[" "] === undefined ? false : keyMap[" "] && canInteract;
+
+      if(canInteract && camera.position.clone().sub(new Vector3(-5, 7, 3)).length() < 4)
+        playText.style.display = "block";
+      else
+        playText.style.display = "none";
+
+      if(interact){
+        if(sound.isPlaying){
+          sound.pause();
+          playText.innerText = "play the music [space]";
+          playText.style.display = "none";
+        }else {
+          sound.play();
+          playText.innerText = "pause the music [space]";
+          playText.style.display = "none";
+        }
+
+        canInteract = false;
+        setTimeout(function(){
+          canInteract = true;
+        }, 1000);
+      }
     }
+    //-5, 7, 3
   };
 
   const direction = new THREE.Vector3();
@@ -94,7 +125,7 @@ let initFPSCam = (camera, player, renderer) => {
   }
 
   let fpsCam = {
-    update: update,
+    update: update
   };
 
   return fpsCam;

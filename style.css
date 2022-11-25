@@ -23,4 +23,6 @@ canvas {
 
 #resumeButton{
   margin:0 auto;
+  padding: 15px 15px;
+  font-size: 20px;
 }

@@ -86,7 +86,7 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     let smallSpace = 3;
     // - tv area
     // south wall
-    addCanvas(1, [15.95, 2.25, 6.5], 1, 1.25);
+    addCanvas(9, [15.95, 2.25, 6.5], 1, 1);
     addCanvas(0, [15.95, 2.25, 6.5 - 3*1], 1, 1.25);
     addCanvas(2, [15.95, 2.25, 6.5 - 3*2], 1, 1.25);
     addCanvas(26, [15.95, 2.25, 6.5 - 3*3], 1, 1.25);  
@@ -100,7 +100,7 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     addCanvas(36, [12-space, 3, -15.9], 2, 2);
     addCanvas(20, [11.5-space*2, 3, -15.9], 2, 1.5);
     // west
-    addCanvas(9, [13.5, 2, 7.95], 2);
+    addCanvas(1, [13.5, 2.25, 7.95], 2, 1.5);
     addCanvas(10, [3.5, 2.25, 7.95], 2, 1.5); // study
     //north
     addCanvas(11, [1.05, 2.25, 5.5], 1, 1.25);
@@ -112,7 +112,7 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     // east
     addCanvas(19, [-9, 2, -15.9], 2, 1.5);
     addCanvas(16, [-9-space, 2, -15.9], 2, 1.5);
-    addCanvas(28, [-9-space*2, 2, -15.9], 2, 1.25); 
+    addCanvas(28, [-9-space*2, 2, -15.9], 2, 1.5); 
     //west
     addCanvas(18, [-9, 2, 7.95], 2, 1.5);
     addCanvas(15, [-9-space, 2, 7.95], 2, 1.25);
@@ -134,7 +134,7 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     // addCanvas(29, [-12-3.5*4, 7.5, -19.9], 2, 1.75); 
     // addCanvas(6, [-12-3.5*5, 7.5, -19.9], 2, 1.5);
 
-    addCanvas(34, [-31.9, 7.5, -17.5], 1, 1.5); // study
+    addCanvas(34, [-31.9, 7.5, -17.5], 1, 1.75); // study
     addCanvas(7, [-31.9, 7.5, -17.5+3.5], 1, 1.5); 
     addCanvas(35, [-31.9, 7.5, -17.5+3.5*2], 1, 1.5);
     // west
