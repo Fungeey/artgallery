@@ -12,15 +12,27 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
   const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 0.2);
   scene.add(light);
   
+  let startRot = camera.rotation.y;
+  let loadingScreen = document.getElementById("loading");
+
   async function loadAll(){
     addBounds();
     addLighting();
     await loadGallery();
     await loadFurniture();
     await addCanvases();
-    console.log("loaded");
+    rotate();
   }
   await loadAll();
+
+  function rotate(){
+    if(camera.rotation.y < startRot + Math.PI * 2){
+      camera.rotation.y += 0.4;
+      setTimeout(rotate, 100); 
+    }else{
+      loadingScreen.style.display = "none";
+    }
+  }
 
   let videoTex = addTVs();
 

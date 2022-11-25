@@ -18,7 +18,7 @@ let initFPSCam = (camera, player, renderer, sound) => {
   // unlock
   controls.addEventListener("lock", () => {
     pauseScreen.style.display = "none";
-    resumeButton.style.display = "none";
+    resumeButton.style.visibility = "hidden";
 
     document.addEventListener("keydown", onDocumentKey, false);
     document.addEventListener("keyup", onDocumentKey, false);
@@ -31,7 +31,7 @@ let initFPSCam = (camera, player, renderer, sound) => {
     document.removeEventListener("keyup", onDocumentKey, false);
 
     setTimeout(() => {
-      resumeButton.style.display = "block";
+      resumeButton.style.visibility = "visible";
     }, 1000);
   });
 
@@ -58,28 +58,6 @@ let initFPSCam = (camera, player, renderer, sound) => {
       run = keyMap["j"] === undefined ? false : keyMap["j"];
 
       interact = keyMap[" "] === undefined ? false : keyMap[" "] && canInteract;
-
-      if(canInteract && camera.position.clone().sub(new Vector3(-5, 7, 3)).length() < 4)
-        playText.style.display = "block";
-      else
-        playText.style.display = "none";
-
-      if(interact){
-        if(sound.isPlaying){
-          sound.pause();
-          playText.innerText = "play the music [space]";
-          playText.style.display = "none";
-        }else {
-          sound.play();
-          playText.innerText = "pause the music [space]";
-          playText.style.display = "none";
-        }
-
-        canInteract = false;
-        setTimeout(function(){
-          canInteract = true;
-        }, 1000);
-      }
     }
     //-5, 7, 3
   };
@@ -122,6 +100,34 @@ let initFPSCam = (camera, player, renderer, sound) => {
     camera.position.lerp(new THREE.Vector3(player.position.x, player.position.y + 1.75, player.position.z), 0.1);
 
     prevTime = time;
+
+    updateMusic();
+  }
+
+  function updateMusic(){
+    let isClose = camera.position.clone().sub(new Vector3(-5, 7, 3)).length() < 2.5;
+    
+    if(canInteract && isClose)
+      playText.style.display = "block";
+    else
+      playText.style.display = "none";
+
+    if(canInteract && interact){
+      if(sound.isPlaying){
+        sound.pause();
+        playText.innerText = "play the music [space]";
+        playText.style.display = "none";
+      }else {
+        sound.play();
+        playText.innerText = "pause the music [space]";
+        playText.style.display = "none";
+      }
+
+      canInteract = false;
+      setTimeout(function(){
+        canInteract = true;
+      }, 1000);
+    }
   }
 
   let fpsCam = {

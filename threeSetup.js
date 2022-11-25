@@ -22,6 +22,7 @@ renderer = new THREE.WebGLRenderer({
   alpha: true,
 });
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.domElement.setAttribute("id", "webglcanvas");
 document.body.appendChild(renderer.domElement);
 
 // Set up world
