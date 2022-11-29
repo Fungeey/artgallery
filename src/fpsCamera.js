@@ -112,7 +112,7 @@ let initFPSCam = (camera, player, renderer, sound) => {
     else
       playText.style.display = "none";
 
-    if(canInteract && interact){
+    if(canInteract && interact && isClose){
       if(sound.isPlaying){
         sound.pause();
         playText.innerText = "play the music [space]";

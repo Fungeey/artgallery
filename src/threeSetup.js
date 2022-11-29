@@ -3,7 +3,7 @@ import { initFPSCam } from "./fpsCamera.js";
 import {cannonDebugRenderer} from "./cannonDebugRenderer.js";
 import {Stats} from "./stats.js";
 
-let debug = false;
+let debug = true;
 
 let camera, scene, renderer;
 camera = new THREE.PerspectiveCamera(
@@ -77,11 +77,12 @@ function render() {
   stats.begin();
   fpsCam.update();
   renderer.render(scene, camera);
+  console.log(renderer.info.render.calls);
   stats.end();
 }
 
 let exports = { THREE, camera, scene, render, world};
 
 // init scene
-import { level } from "./level1.js";
+import { level } from "./level1optimized.js";
 level.initLevel(exports);

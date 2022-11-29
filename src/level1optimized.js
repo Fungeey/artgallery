@@ -1,4 +1,4 @@
-import { Camera, MeshBasicMaterial } from "three";
+import { Camera, MeshBasicMaterial, MeshStandardMaterial, Object3D, Vector3 } from "three";
 import * as util from "./util.js";
 import { usedTextures, artTextures } from "./textures.js";
 
@@ -6,11 +6,14 @@ const { sin, cos, PI, max, min } = Math;
 
 let floorMat;
 let initLevel = async ({ THREE, camera, scene, render, world }) => {  
-  let ambientLight = new THREE.AmbientLight(0x707070);
+  let ambientLight = new THREE.AmbientLight(0x808080);
   scene.add(ambientLight);
 
-  const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 0.2);
+  const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 0.3);
   scene.add(light);
+  const light2 = new THREE.HemisphereLight(0xfffbf0, 0x707070, 0.2);
+  light2.position.set(1, 0, 0);
+  scene.add(light2);
   
   let targetRot = camera.rotation.y + Math.PI * 2;
   let loadingScreen = document.getElementById("loading");
@@ -19,9 +22,8 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
 
   async function loadAll(){
     animateDots();
-
     addBounds();
-    addLighting();
+    // addLighting();
 
     loadingText.innerText = "loading gallery";
     await loadGallery();
@@ -82,11 +84,6 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     let arts = [];
     for(let i = 0; i < usedTextures.length; i++)
       arts[i] = await util.loadTexture("./assets/art/" + artTextures[usedTextures[i]]);
-    
-    function getArt(){
-      let random = Math.floor(Math.random()*arts.length);
-      return arts[random];
-    }
 
     let bannerPng = await util.loadTexture("./assets/banner.png");
     let bannerGeo = new THREE.BoxGeometry(8, bannerPng.image.height / bannerPng.image.width * 8, 0.01);
@@ -95,106 +92,113 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     banner.rotation.set(0, Math.PI/2 * 1, 0);
     scene.add(banner);
 
-    function addCanvas(id, pos, rot, scale = 1){
-      let tex = arts[id];
-      let geo = new THREE.BoxGeometry(2 * scale, tex.image.height / tex.image.width * 2 * scale, 0.1);
-
-      let cubeMaterialArray = [
-        floorMat,
-        floorMat,
-        floorMat,
-        floorMat,
-        new THREE.MeshBasicMaterial( { map: tex } ),
-        new THREE.MeshBasicMaterial( { map: tex } )
-      ];
-      let canvas = new THREE.Mesh( geo, cubeMaterialArray );
+    async function addCanvas(id, pos, rot, scale = 1){
+      // let tex = arts[id];
+      let tex = await util.loadTexture("./assets/art/" + artTextures[usedTextures[id]]);
+      let geo = new THREE.PlaneGeometry(2 * scale, tex.image.height / tex.image.width * 2 * scale);
+      let canvas = new THREE.Mesh( geo, new THREE.MeshBasicMaterial( { map: tex } ) );
       canvas.position.set(pos[0], pos[1], pos[2]);
       canvas.rotation.set(0, Math.PI/2 * rot, 0);
+      canvas.matrixAutoUpdate = false;
+      canvas.updateMatrix();
       scene.add(canvas);
 
-      let cubeGeometry = new THREE.BoxGeometry(2 * scale+0.1, tex.image.height / tex.image.width * 2 * scale+0.1, 0.08);
-      let frame = new THREE.Mesh(cubeGeometry, floorMat);
-      frame.position.set(pos[0], pos[1], pos[2]);
-      frame.rotation.set(0, Math.PI/2 * rot, 0);
-      scene.add(frame);
+      let ratio = tex.image.height / tex.image.width;
+      addFrame({ratio:ratio, pos:pos, rot:rot, scale:scale});
 
       return canvas;
     }
 
+    let frameProxy = new Object3D();
+    let cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+    let numFrames = 0;
+    let frameInstances = new THREE.InstancedMesh(cubeGeometry, floorMat, 48);
+    function addFrame(frame){
+      let zoff = 0;
+      if(frame.rot == 0)zoff = -0.045;
+      else if(frame.rot == 2) zoff = 0.045;
+      
+      let xoff = 0;
+      if(frame.rot == 1)xoff = -0.045;
+      else if(frame.rot == 3) xoff = 0.045;
+
+      frameProxy.position.set(frame.pos[0] + xoff, frame.pos[1], frame.pos[2] + zoff);
+      frameProxy.rotation.set(0, Math.PI/2 * frame.rot, 0);
+      frameProxy.scale.set(2 * frame.scale + 0.2, 2 * frame.scale * frame.ratio + 0.2, 0.08);
+      frameProxy.updateMatrix();
+      frameInstances.setMatrixAt(numFrames++, frameProxy.matrix);
+    }
+
     let space = 4;
-    let smallSpace = 3;
     // - tv area
     // south wall
-    addCanvas(9, [15.95, 2.25, 6.5], 1, 1);
-    addCanvas(0, [15.95, 2.25, 6.5 - 3*1], 1, 1.25);
-    addCanvas(2, [15.95, 2.25, 6.5 - 3*2], 1, 1.25);
-    addCanvas(26, [15.95, 2.25, 6.5 - 3*3], 1, 1.25);  
-    addCanvas(4, [15.95, 2.25, 6.5 - 3*4], 1, 1.25);
-    addCanvas(5, [15.95, 2.25, 6.5 - 3*5], 1, 1.25);
-    addCanvas(48, [15.95, 2.25, 6.5 - 3*6], 1, 1.25);
-    addCanvas(49, [15.95, 2.25, 6.5 - 3*7], 1, 1.25);
-    addCanvas(50, [15.95, 2.25, 6.5 - 3*8], 1, 1.25);
+    await addCanvas(9, [15.95, 2.25, 6.5], 3, 1);
+    await addCanvas(0, [15.95, 2.25, 6.5 - 3*1], 3, 1.25);
+    await addCanvas(2, [15.95, 2.25, 6.5 - 3*2], 3, 1.25);
+    await addCanvas(26, [15.95, 2.25, 6.5 - 3*3], 3, 1.25);  
+    await addCanvas(4, [15.95, 2.25, 6.5 - 3*4], 3, 1.25);
+    await addCanvas(5, [15.95, 2.25, 6.5 - 3*5], 3, 1.25);
+    await addCanvas(48, [15.95, 2.25, 6.5 - 3*6], 3, 1.25);
+    await addCanvas(49, [15.95, 2.25, 6.5 - 3*7], 3, 1.25);
+    await addCanvas(50, [15.95, 2.25, 6.5 - 3*8], 3, 1.25);
     // east
-    addCanvas(31, [13, 3, -15.9], 2, 1.75);
-    addCanvas(36, [12-space, 3, -15.9], 2, 2);
-    addCanvas(20, [11.5-space*2, 3, -15.9], 2, 1.5);
+    await addCanvas(31, [13, 3, -15.9], 0, 1.75);
+    await addCanvas(36, [12-space, 3, -15.9], 0, 2);
+    await addCanvas(20, [11.5-space*2, 3, -15.9], 0, 1.5);
     // west
-    addCanvas(1, [13.5, 2.25, 7.95], 2, 1.5);
-    addCanvas(10, [3.5, 2.25, 7.95], 2, 1.5); // study
+    await addCanvas(1, [13.5, 2.25, 7.95], 2, 1.5);
+    await addCanvas(10, [3.5, 2.25, 7.95], 2, 1.5); // study
     //north
-    addCanvas(11, [1.05, 2.25, 5.5], 1, 1.25);
-    addCanvas(12, [1.05, 2.25, 2.5], 1, 1.25);
-    addCanvas(13, [1.05, 2.25, -10.5], 1, 1.25);
-    addCanvas(14, [1.05, 2.25, -13.5], 1, 1.25);
+    await addCanvas(11, [1.05, 2.25, 5.5], 1, 1.25);
+    await addCanvas(12, [1.05, 2.25, 2.5], 1, 1.25);
+    await addCanvas(13, [1.05, 2.25, -10.5], 1, 1.25);
+    await addCanvas(14, [1.05, 2.25, -13.5], 1, 1.25);
 
     //-under area
     // east
-    addCanvas(19, [-9, 2, -15.9], 2, 1.5);
-    addCanvas(16, [-9-space, 2, -15.9], 2, 1.5);
-    addCanvas(28, [-9-space*2, 2, -15.9], 2, 1.5); 
+    await addCanvas(19, [-9, 2, -15.9], 0, 1.5);
+    await addCanvas(16, [-9-space, 2, -15.9], 0, 1.5);
+    await addCanvas(28, [-9-space*2, 2, -15.9], 0, 1.5); 
     //west
-    addCanvas(18, [-9, 2, 7.95], 2, 1.5);
-    addCanvas(15, [-9-space, 2, 7.95], 2, 1.25);
-    addCanvas(43, [-9-space*2, 2, 7.95], 2, 1.5);
+    await addCanvas(18, [-9, 2, 7.95], 2, 1.5);
+    await addCanvas(15, [-9-space, 2, 7.95], 2, 1.25);
+    await addCanvas(43, [-9-space*2, 2, 7.95], 2, 1.5);
     //north
-    addCanvas(32, [-19.8, 5.5, -4], 1, 2.5); // portrait
-    addCanvas(22, [-19.8, 2.5, 4.4], 1, 2);
-    addCanvas(23, [-19.8, 2.5, -12.25], 1, 2);
-    // addCanvas(24, [-19.8, 2, -10.5], 1);
-    // addCanvas(25, [-19.8, 2, -10.5-3], 1);
-    
+    await addCanvas(32, [-19.8, 5.5, -4], 1, 2.5); // portrait
+    await addCanvas(22, [-19.8, 2.5, 4.4], 1, 2);
+    await addCanvas(23, [-19.8, 2.5, -12.25], 1, 2);
     //-upstairs
     // east
-    //
-    addCanvas(44,  [-10, 7.5, -18], 1, 1.5);
+    await addCanvas(44,  [-10.1, 7.5, -18], 3, 1.5);
     
-    addCanvas(3,  [-14, 7.5, -19.9], 2, 1.5);
-    addCanvas(42, [-14-4.5, 7.5, -19.9], 2, 1.5);
-    addCanvas(17, [-14-4.5*2, 7.5, -19.9], 2, 1.5);
-    addCanvas(30, [-14-4.5*3, 7.5, -19.9], 2, 1.5);
+    await addCanvas(3,  [-14, 7.5, -19.9], 0, 1.5);
+    await addCanvas(42, [-14-4.5, 7.5, -19.9], 0, 1.5);
+    await addCanvas(17, [-14-4.5*2, 7.5, -19.9], 0, 1.5);
+    await addCanvas(30, [-14-4.5*3, 7.5, -19.9], 0, 1.5);
 
-    addCanvas(34, [-31.9, 7.5, -17.5], 1, 1.75); // study
-    addCanvas(7, [-31.9, 7.5, -17.5+3.5], 1, 1.5); 
-    addCanvas(35, [-31.9, 7.5, -17.5+3.5*2], 1, 1.5);
+    await addCanvas(34, [-31.9, 7.5, -17.5], 1, 1.75); // study
+    await addCanvas(7, [-31.9, 7.5, -17.5+3.5], 1, 1.5); 
+    await addCanvas(35, [-31.9, 7.5, -17.5+3.5*2], 1, 1.5);
     // west
-    addCanvas(37, [-12, 7.5, 11.9], 2, 1.5);
-    addCanvas(38, [-12-3.5, 7.5, 11.9], 2, 1.25);
-    addCanvas(39, [-12-3.5*2, 7.5, 11.9], 2, 1.25);
-    addCanvas(40, [-12-3.5*3, 7.5, 11.9], 2, 1.5);
-    addCanvas(41, [-12-3.5*4, 7.5, 11.9], 2, 1.25);
-    addCanvas(27, [-12-3.5*5, 7.5, 11.9], 2, 1.25);  
+    await addCanvas(37, [-12, 7.5, 11.9], 2, 1.5);
+    await addCanvas(38, [-12-3.5, 7.5, 11.9], 2, 1.25);
+    await addCanvas(39, [-12-3.5*2, 7.5, 11.9], 2, 1.25);
+    await addCanvas(40, [-12-3.5*3, 7.5, 11.9], 2, 1.5);
+    await addCanvas(41, [-12-3.5*4, 7.5, 11.9], 2, 1.25);
+    await addCanvas(27, [-12-3.5*5, 7.5, 11.9], 2, 1.25);  
 
-    addCanvas(8, [-12-3.5*3-1.5, 7.7, 0.1], 2, 2);
-    addCanvas(53, [-12-3.5*3-1.5, 7.7, -8.1], 2, 2);
+    await addCanvas(8, [-12-3.5*3-1.5, 7.7, 0.1], 0, 2);
+    await addCanvas(53, [-12-3.5*3-1.5, 7.7, -8.1], 2, 2);
 
-    addCanvas(45, [-31.9, 7.5, 2.5], 1, 1.5);
-    addCanvas(46, [-31.9, 7.5, 2.5+3.5], 1, 1.25);
-    addCanvas(47, [-31.9, 7.5, 2.5+3.5*2], 1, 1.75);
+    await addCanvas(45, [-31.9, 7.5, 2.5], 1, 1.5);
+    await addCanvas(46, [-31.9, 7.5, 2.5+3.5], 1, 1.25);
+    await addCanvas(47, [-31.9, 7.5, 2.5+3.5*2], 1, 1.75);
 
     // tunnel
-    addCanvas(29, [-31.9, 7.5, 2-3.5], 1, 1.75); 
-    addCanvas(6, [-31.9, 7.5, 2-4.5*2], 1, 1.5);
-    // addCanvas(51, [-31.9, 7.5, 2.5-3.5*3], 1, 1.5);
+    await addCanvas(29, [-31.9, 7.5, 2-3.5], 1, 1.75); 
+    await addCanvas(6, [-31.9, 7.5, 2-4.5*2], 1, 1.5);
+
+    scene.add(frameInstances);
   }
 
   function addTVs(){
@@ -236,6 +240,7 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
   }
 
   async function loadGallery() {
+    let materials = [];
     let gallery = await util.loadGLB("./assets/models/gallery.glb");
     gallery.scene.position.y += 0.25;
 
@@ -254,10 +259,14 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
             return;
           }
 
-          e.material = new THREE.MeshStandardMaterial({
-            transparent:true,
-            opacity:0,
-          });
+          e.visible = false;
+        }else{
+          if(!materials.includes(e.material.name))
+            materials.push(e.material.name);
+
+          if(e.material.name != "wall" && e.material.name != "glass"){
+            e.visible = false;
+          }
         }
       }
     });
@@ -284,16 +293,16 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
     addObject("table.glb", -5, 5, 3, 1, 1.5);
     addObject("player.glb", -5, 6.4, 3, 3, 15);
 
-    addObject("bench.glb", -19, 5.25, 6, 0, 2);
-    addObject("bench.glb", -23, 5.25, 6, 0, 2);
-    addObject("bench.glb", -19, 5.25, -14, 0, 2);
-    addObject("bench.glb", -23, 5.25, -14, 0, 2);
+    // addObject("bench.glb", -19, 5.25, 6, 0, 2);
+    // addObject("bench.glb", -23, 5.25, 6, 0, 2);
+    // addObject("bench.glb", -19, 5.25, -14, 0, 2);
+    // addObject("bench.glb", -23, 5.25, -14, 0, 2);
     
-    addObject("bench.glb", -7, 0.25, -4, 0, 2);
-    addObject("bench.glb", -13, 0.25, -4, 0, 2);
+    // addObject("bench.glb", -7, 0.25, -4, 0, 2);
+    // addObject("bench.glb", -13, 0.25, -4, 0, 2);
 
-    addObject("bench.glb", 8.5, 0.25, -8, 0, 2); // downstairs
-    addObject("bench.glb", 8.5, 0.25, 0, 0, 2);
+    // addObject("bench.glb", 8.5, 0.25, -8, 0, 2);
+    // addObject("bench.glb", 8.5, 0.25, 0, 0, 2);
 
     // addIvy();
 
@@ -329,13 +338,13 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
 
     addBigLight({x:8.5, y:5, z:1});
     addBigLight({x:8.5, y:5, z:-10});
-    addSmallLight({x:8.5, y:5, z:15});
+    // addSmallLight({x:8.5, y:5, z:15});
 
     // atrium
     addBigLight({x:-7, y:5, z:-4});
     addBigLight({x:-14, y:5, z:-4});
 
-    // left
+    left
     addSmallLight({x:-10, y:8, z:6});
     addSmallLight({x:-17, y:8, z:6});
     addSmallLight({x:-25, y:8, z:6});
