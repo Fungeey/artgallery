@@ -249,8 +249,8 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
           if (e.material.name === "floor"){
             floorMat = e.material;
             let brightness = 0.13;
-            e.material.roughness = 0.6;
-            e.material.emissive = {isColor:true, r:brightness, g:brightness, b:brightness};
+            // e.material.roughness = 0.6;
+            // e.material.emissive = {isColor:true, r:brightness, g:brightness, b:brightness};
             return;
           }
 
@@ -274,8 +274,8 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
       if(isIvy)
         obj.scene.traverse((e) => {
           if(e.material == null) return;
-          e.material.roughness = 0.6;
-          e.material.emissive = {isColor:true, r:0.13, g:0.13, b:0.13};
+          // e.material.roughness = 0.6;
+          // e.material.emissive = {isColor:true, r:0.13, g:0.13, b:0.13};
         })
       return obj.scene;
     }
