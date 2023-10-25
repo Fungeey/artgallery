@@ -9,7 +9,7 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
   let ambientLight = new THREE.AmbientLight(0x707070);
   scene.add(ambientLight);
 
-  const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 0.2);
+  const light = new THREE.HemisphereLight(0xfaf9f6, 0x707070, 1);
   scene.add(light);
   
   let targetRot = camera.rotation.y + Math.PI * 2;
@@ -316,13 +316,13 @@ let initLevel = async ({ THREE, camera, scene, render, world }) => {
 
   function addLighting(){
     function addBigLight(vector3, intensity){
-      const light = new THREE.PointLight(0xfaf9f6, 0.5, 10);
+      const light = new THREE.PointLight(0xfaf9f6, 15, 30);
       light.position.set(vector3.x, vector3.y, vector3.z);
       scene.add(light);
     }
     
     function addSmallLight(vector3){
-      const light = new THREE.PointLight(0x888888, 0.5, 10);
+      const light = new THREE.PointLight(0x888888, 15, 30);
       light.position.set(vector3.x, vector3.y, vector3.z);
       scene.add(light);
     }

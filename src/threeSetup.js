@@ -77,6 +77,7 @@ function render() {
   stats.begin();
   fpsCam.update();
   renderer.render(scene, camera);
+  console.log(scene);
   if(debug) console.log(renderer.info.render.calls);
   stats.end();
 }
